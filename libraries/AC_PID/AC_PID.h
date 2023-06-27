@@ -42,7 +42,7 @@ public:
 
 
     // The control loop for MFC control algorithm
-    float update_all_mfc(float target, float measurement, bool limit = false);
+    float update_all_mfc(float target, float measurement, float dt, bool limit = false, float boost = 1.0f);
     float double_derivative_set_point(float set_point);
     float double_derivative_measurement(float measurement);
     float update_all_mfc_yaw(float target, float measurement, bool limit);
