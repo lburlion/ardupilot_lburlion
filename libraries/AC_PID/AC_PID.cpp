@@ -229,7 +229,7 @@ float AC_PID::update_all(float target, float measurement, float dt, bool limit, 
 
 // The control loop for MFC control algorithm
 
-float AC_PID::update_all_mfc(float target, float measurement, bool limit)
+float AC_PID::update_all_mfc(float target, float measurement, float _dt, bool limit, float boost)
 {
     // don't process inf or NaN
     if (!isfinite(target) || !isfinite(measurement)) {
