@@ -405,6 +405,11 @@ struct PACKED log_PID {
     float   Dmod;
     float   slew_rate;
     uint8_t limit;
+    float   curr;
+    float   sp_der;
+    float   m_der;
+    float   f_hat;
+};
 };
 
 struct PACKED log_WheelEncoder {
