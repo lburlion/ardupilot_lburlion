@@ -13,6 +13,13 @@
 #define AC_PID_EFILT_HZ_DEFAULT  0.0f   // default input filter frequency
 #define AC_PID_DFILT_HZ_DEFAULT  20.0f   // default input filter frequency
 #define AC_PID_RESET_TC          0.16f   // Time constant for integrator reset decay to zero
+#define AC_MFC_KP_DEFAULT        0.01f   // kp value
+#define AC_MFC_KD_DEFAULT        0.001f  // kd value
+#define AC_MFC_LAMBDA_DEFAULT    2.5f    // Lambda value
+#define AC_MFC_GAIN_DEFAULT      0.01f   // gain value
+#define AC_MFC_DT_DEFAULT      0.0025f   // dt value
+#define AC_PID_MFILT_HZ_DEFAULT  20.0f   // default input filter frequency for measurement
+#define AC_MFC_DN_DEFAULT        20.0f   // Number of rectangles for Simpsons
 
 #include "AP_PIDInfo.h"
 
@@ -32,6 +39,17 @@ public:
     //  the derivative is then calculated and filtered
     //  the integral is then updated based on the setting of the limit flag
     float update_all(float target, float measurement, float dt, bool limit = false, float boost = 1.0f);
+
+
+    // The control loop for MFC control algorithm
+    float update_all_mfc(float target, float measurement, bool limit = false);
+    float double_derivative_set_point(float set_point);
+    float double_derivative_measurement(float measurement);
+    float update_all_mfc_yaw(float target, float measurement, bool limit);
+    float m_der_average(float new_num);
+    float F_hat(float x, bool y, bool z, float _f1_measurement, float _last_f1_u);
+    float F_hat_F(bool y, bool z, float _f_measurement, float _last_f_u);
+
 
     //  update_error - set error input to PID controller and calculate outputs
     //  target is set to zero and error is set and filtered
@@ -136,6 +154,15 @@ protected:
     AP_Float _filt_E_hz;         // PID error filter frequency in Hz
     AP_Float _filt_D_hz;         // PID derivative filter frequency in Hz
     AP_Float _slew_rate_max;
+    AP_Float _mfc_kp;                 // kp value for mfc PD loop
+    AP_Float _mfc_kd;                 // kd value for mfc PD loop
+    AP_Float _lambda;
+    AP_Float _gain_i;                 // gain for mfc measurement derivatives
+    AP_Float _gain_sp;                // gain for mfc set point derivatives
+    AP_Float _measurement_filt_hertz; //measurement filter value
+    AP_Float _gain_f_hat;             //gain for F_Hat
+    AP_Float _mfc_dt;                 // Time step for Integral Approximation 
+    AP_Float _mfc_n;                  // Number of rectangles for Simpsons Rule
 
     SlewLimiter _slew_limiter{_slew_rate_max, _slew_rate_tau};
 
@@ -150,6 +177,19 @@ protected:
     float _error;             // error value to enable filtering
     float _derivative;        // derivative value to enable filtering
     int8_t _slew_limit_scale;
+    float _last_u;                 // to store the last u term
+    float _current_u;              // current u term
+    float _sp_first_der_old_val;    
+    float _sp_old_val;
+    float _m_first_der_old_val;
+    float _m_old_val;
+    float _measurement;
+    float _f_hat;
+    bool  _limit_checker;
+    float _m_second_der_old_val;
+    float _m_der_set[5]; 
+    float _F_hat_calc;
+    float _sp_double_der;
 
     AP_PIDInfo _pid_info;
 
