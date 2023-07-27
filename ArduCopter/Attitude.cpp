@@ -15,7 +15,13 @@ void Copter::run_rate_controller()
     pos_control->set_dt(last_loop_time_s);
 
     // run low level rate controllers that only require IMU data
-    attitude_control->rate_controller_run(); 
+    if (copter.flightmode->mode_number() == Mode::Number::MFC && motors->get_spool_state() == AP_Motors::SpoolState::THROTTLE_UNLIMITED){
+        attitude_control->rate_controller_run_mfc();
+    }
+    else
+    {
+        attitude_control->rate_controller_run();
+    };
 }
 
 /*************************************************************

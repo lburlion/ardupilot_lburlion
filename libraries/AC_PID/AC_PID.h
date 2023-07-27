@@ -43,9 +43,9 @@ public:
 
     // The control loop for MFC control algorithm
     float update_all_mfc(float target, float measurement, float dt, bool limit = false, float boost = 1.0f);
-    float double_derivative_set_point(float set_point);
-    float double_derivative_measurement(float measurement);
-    float update_all_mfc_yaw(float target, float measurement, bool limit);
+    float double_derivative_set_point(float set_point, float _dt);
+    float double_derivative_measurement(float measurement, float _dt);
+    float update_all_mfc_yaw(float target, float measurement, float _dt, bool limit, float boost);
     float m_der_average(float new_num);
     float F_hat(float x, bool y, bool z, float _f1_measurement, float _last_f1_u);
     float F_hat_F(bool y, bool z, float _f_measurement, float _last_f_u);

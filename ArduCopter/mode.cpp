@@ -175,6 +175,12 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
             break;
 #endif
 
+#if MODE_MFC_ENABLED == ENABLED
+        case Mode::Number::MFC:
+            ret = &mode_mfc;
+            break;
+#endif
+
         default:
             break;
     }

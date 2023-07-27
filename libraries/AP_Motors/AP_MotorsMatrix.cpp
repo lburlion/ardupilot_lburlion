@@ -179,8 +179,8 @@ void AP_MotorsMatrix::output_to_motors()
         if (motor_enabled[i]) {
             if (_checker && i == _motor_num){
                     int output = (int)(_percent_loss*output_to_pwm(_actuator[i]));  // calculate output
-                    if (output < 1000){  // if lower than the minimum, replace it with minimum
-                        rc_write(i, 1000);
+                    if (output < 1100){  // if lower than the minimum, replace it with minimum
+                        rc_write(i, 1100);
                     }
                     else {
                         rc_write(i, output);

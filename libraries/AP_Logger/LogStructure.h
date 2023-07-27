@@ -410,7 +410,6 @@ struct PACKED log_PID {
     float   m_der;
     float   f_hat;
 };
-};
 
 struct PACKED log_WheelEncoder {
     LOG_PACKET_HEADER;

@@ -248,13 +248,13 @@ float AC_PID::update_all_mfc(float target, float measurement, float _dt, bool li
         _limit_checker = true;
     } else {
         float error_last = _error;
-        _target += get_filt_T_alpha() * (target - _target);
-        _error += get_filt_E_alpha() * ((_target - measurement) - _error);
+        _target += get_filt_T_alpha(_dt) * (target - _target);
+        _error += get_filt_E_alpha(_dt) * ((_target - measurement) - _error);
         //_measurement += calc_lowpass_alpha_dt(_dt, _measurement_filt_hertz) * (measurement - _measurement); // filter for measurement value
         // calculate and filter derivative
         if (_dt > 0.0f) {
             float derivative = (_error - error_last) / _dt;
-            _derivative += get_filt_D_alpha() * (derivative - _derivative);
+            _derivative += get_filt_D_alpha(_dt) * (derivative - _derivative);
         }
     }
     
@@ -277,14 +277,14 @@ float AC_PID::update_all_mfc(float target, float measurement, float _dt, bool li
     if(limit && _limit_checker){
         P_out = (_error * _kp);
         D_out = (_derivative * _kd);
-        update_i(limit);
+        update_i(_dt, limit);
         _current_u = (P_out + D_out + _integrator);
     }
     else{  
         // Simpson's Approximation for Set Point Double Derivative
         _sp_double_der = F_hat_F(false, true, _target, _last_u) * _gain_sp;
         _pid_info.sp_der = _sp_double_der/ _lambda;
-        update_i(limit);
+        update_i(_dt, limit);
         // update f hat value
         _f_hat = F_hat_F(false, false, _measurement, _last_u) * _gain_f_hat;
         _pid_info.m_der = F_hat_F(false, true, _measurement, _last_u) * _gain_f_hat;
@@ -310,7 +310,7 @@ float AC_PID::update_all_mfc(float target, float measurement, float _dt, bool li
     return _current_u;
 }
 
-float AC_PID::update_all_mfc_yaw(float target, float measurement, bool limit)
+float AC_PID::update_all_mfc_yaw(float target, float measurement, float _dt, bool limit, float boost)
 {
     // don't process inf or NaN
     if (!isfinite(target) || !isfinite(measurement)) {
@@ -329,14 +329,14 @@ float AC_PID::update_all_mfc_yaw(float target, float measurement, bool limit)
         _limit_checker = true;
     } else {
         float error_last = _error;
-        _target += get_filt_T_alpha() * (target - _target);
-        _error += get_filt_E_alpha() * ((_target - measurement) - _error);
+        _target += get_filt_T_alpha(_dt) * (target - _target);
+        _error += get_filt_E_alpha(_dt) * ((_target - measurement) - _error);
         //_measurement += calc_lowpass_alpha_dt(_dt, _measurement_filt_hertz) * (measurement - _measurement); // filter for measurement value
         // calculate and filter derivative
         _measurement = measurement;
         if (_dt > 0.0f) {
             float derivative = (_error - error_last) / _dt;
-            _derivative += get_filt_D_alpha() * (derivative - _derivative);
+            _derivative += get_filt_D_alpha(_dt) * (derivative - _derivative);
         }
     }
 
@@ -355,12 +355,12 @@ float AC_PID::update_all_mfc_yaw(float target, float measurement, bool limit)
     if(limit && _limit_checker){
         P_out = (_error * _kp);
         D_out = (_derivative * _kd);
-        update_i(limit);
+        update_i(_dt, limit);
         _current_u = (P_out + D_out + _integrator);
     }
     else{
         // update f hat value
-        update_i(limit);
+        update_i(_dt, limit);
         // Simpson's Approximation for Set Point Double Derivative
         _sp_double_der = F_hat_F(true, true, _target, _last_u) * _gain_sp;
         _pid_info.sp_der = _sp_double_der;
@@ -395,7 +395,7 @@ float AC_PID::update_all_mfc_yaw(float target, float measurement, bool limit)
 //  Target and Measured must be set manually for logging purposes.
 // todo: remove function when it is no longer used.
 
-float AC_PID::double_derivative_set_point(float set_point)
+float AC_PID::double_derivative_set_point(float set_point, float _dt)
 {
 
     float rtrn_val = _gain_sp * (set_point - _sp_old_val) / _dt; // first derivative
@@ -409,7 +409,7 @@ float AC_PID::double_derivative_set_point(float set_point)
     return rtrn_val;
 }
 
-float AC_PID::double_derivative_measurement(float measurement)
+float AC_PID::double_derivative_measurement(float measurement, float _dt)
 {
     float rtrn_val = _gain_i * (measurement - _m_old_val) / _dt; 
     //rtrn_val += get_filt_D_alpha() * (measurement - _m_old_val);
